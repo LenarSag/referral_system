@@ -1,9 +1,7 @@
 from typing import Annotated
 
-
 from fastapi import Depends, APIRouter, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.database import get_session
