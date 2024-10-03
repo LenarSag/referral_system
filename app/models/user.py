@@ -50,7 +50,7 @@ class User(Base):
     password: Mapped[str] = mapped_column(nullable=False)
 
     referral_code: Mapped[list['ReferralCode']] = relationship(back_populates='user')
-    referral: Mapped[list['User']] = relationship(
+    referrals: Mapped[list['User']] = relationship(
         secondary=user_referral,
         primaryjoin=id == user_referral.c.user_id,
         secondaryjoin=id == user_referral.c.referral_id,
@@ -77,7 +77,33 @@ class ReferralCode(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[PG_UUID] = mapped_column(ForeignKey('user.id', ondelete='CASCADE'))
-    code: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+    code: Mapped[str] = mapped_column(String(12), unique=True, nullable=False)
     expires_at: Mapped[datetime] = mapped_column(nullable=False)
+    active: Mapped[bool] = mapped_column(nullable=False)
 
     user: Mapped['User'] = relationship(back_populates='referral_code')
+
+    code_regex = re.compile(
+        r'^(?=.*[a-z])'  # At least one lowercase letter
+        r'(?=.*[A-Z])'  # At least one uppercase letter
+        r'(?=.*\d)'  # At least one digit
+        r'[A-Za-z\d]{12,}$'  # Minimum 12 characters (only letters and digits)
+    )
+
+    @validates('code')
+    def validate_code(self, key, code):
+        if not self.code_regex.match(code):
+            raise ValueError(
+                'Referral code must be at least 12 characters long, '
+                'contain at least one uppercase letter, one lowercase letter, and one digit.'
+            )
+        return code
+
+    @property
+    def is_active(self):
+        now = datetime.now()
+        return self.expires_at > now and self.active
+
+    __table_args__ = (
+        UniqueConstraint('user_id', 'active', name='unique_active_referral_code'),
+    )
