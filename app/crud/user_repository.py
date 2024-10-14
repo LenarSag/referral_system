@@ -1,5 +1,8 @@
 from typing import Optional
+from uuid import UUID
 
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
 from pydantic import EmailStr
 from sqlalchemy import or_
 from sqlalchemy.future import select
@@ -7,7 +10,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.user import ReferralCode, User, user_referral
-from app.schemas.referral_code_schema import ReferralCodeBase
 from app.schemas.user_schema import UserCreate
 
 
@@ -44,3 +46,10 @@ async def create_new_referral_user(
     await session.commit()
 
     return new_user
+
+
+async def get_referrals_by_referrer(
+    session: AsyncSession, params: Params, referrer_id: UUID
+) -> Page[User]:
+    stmt = select(User).join(User.referrals).where(User.id == referrer_id)
+    return await paginate(session, stmt, params)

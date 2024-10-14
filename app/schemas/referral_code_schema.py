@@ -26,6 +26,10 @@ class ReferralCodeCreate(ReferralCodeBase):
 
 class ReferralCodeOut(ReferralCodeCreate):
     id: int
-    user: UserOut
+    is_active: bool
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class ReferralCodeUserOut(ReferralCodeOut):
+    user: UserOut

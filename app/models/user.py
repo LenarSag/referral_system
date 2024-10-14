@@ -4,11 +4,12 @@ import re
 from sqlalchemy import (
     Column,
     ForeignKey,
+    func,
     String,
     Table,
-    UniqueConstraint,
 )
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
@@ -88,6 +89,10 @@ class ReferralCode(Base):
             )
         return code
 
-    @property
+    @hybrid_property
     def is_active(self):
         return self.expires_at > datetime.now()
+
+    @is_active.expression
+    def is_active(cls):
+        return cls.expires_at > func.now()

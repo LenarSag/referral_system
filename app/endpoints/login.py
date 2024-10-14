@@ -58,6 +58,7 @@ async def create_user_as_referral(
             detail='Referral code not found or expired',
             status_code=status.HTTP_400_BAD_REQUEST,
         )
+
     user = await check_username_and_email(session, user_data.username, user_data.email)
     if user:
         if user.username == user_data.username:

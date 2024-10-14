@@ -1,7 +1,8 @@
 from datetime import datetime
 from typing import Optional
 
-
+from fastapi_pagination import Page, Params
+from fastapi_pagination.ext.sqlalchemy import paginate
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -32,6 +33,13 @@ async def get_referral_code(
     return result.scalar()
 
 
+async def get_paginated_codes(
+    session: AsyncSession, params: Params, current_user: User
+) -> Page[ReferralCode]:
+    query = select(ReferralCode).filter_by(user_id=current_user.id)
+    return await paginate(session, query, params)
+
+
 async def check_code_unique(
     session: AsyncSession, referral_code: ReferralCodeBase
 ) -> Optional[ReferralCode]:
@@ -40,12 +48,17 @@ async def check_code_unique(
     return result.scalar()
 
 
-async def check_only_active_code(
-    session: AsyncSession, current_user: User
+async def get_only_active_code(
+    session: AsyncSession, user: User
 ) -> Optional[ReferralCode]:
     query = select(ReferralCode).where(
-        ReferralCode.user_id == current_user.id,
+        ReferralCode.user_id == user.id,
         ReferralCode.expires_at > datetime.now(),
     )
     result = await session.execute(query)
     return result.scalar()
+
+
+async def delete_referral_code(session: AsyncSession, code: ReferralCode) -> None:
+    await session.delete(code)
+    await session.commit()
