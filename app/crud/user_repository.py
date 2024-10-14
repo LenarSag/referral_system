@@ -25,14 +25,11 @@ async def get_user_by_email(session: AsyncSession, email: EmailStr) -> Optional[
     return result.scalar()
 
 
-async def get_referral_code(session: AsyncSession, referral_code: ReferralCodeBase):
-    query = (
-        select(ReferralCode)
-        .filter(ReferralCode.code == referral_code)
-        .options(selectinload(ReferralCode.user))
-    )
-    result = await session.execute(query)
-    return result.scalar()
+async def create_new_user(session: AsyncSession, user_data: UserCreate) -> User:
+    new_user = User(**user_data.model_dump())
+    session.add(new_user)
+    await session.commit()
+    return new_user
 
 
 async def create_new_referral_user(

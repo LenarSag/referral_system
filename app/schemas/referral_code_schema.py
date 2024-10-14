@@ -1,26 +1,27 @@
 from datetime import datetime
-import re
 
-from pydantic import BaseModel, ConfigDict, Field
+from fastapi.exceptions import ValidationException
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from app.schemas.user_schema import UserOut
-
-
-code_regex = re.compile(
-    r'^(?=.*[a-z])'  # At least one lowercase letter
-    r'(?=.*[A-Z])'  # At least one uppercase letter
-    r'(?=.*\d)'  # At least one digit
-    r'[A-Za-z\d]{12,}$'  # Minimum 12 characters (only letters and digits)
-)
+from config import CODE_REGEX
 
 
 class ReferralCodeBase(BaseModel):
-    code: str = Field(pattern=code_regex)
+    code: str = Field(pattern=CODE_REGEX)
 
 
 class ReferralCodeCreate(ReferralCodeBase):
     expires_at: datetime
-    active: bool
+
+    @field_validator('expires_at')
+    @classmethod
+    def validate_expires_at(cls, expires_at):
+        if expires_at:
+            if expires_at < datetime.now():
+                raise ValidationException('Expires time less than current time')
+
+        return expires_at
 
 
 class ReferralCodeOut(ReferralCodeCreate):
