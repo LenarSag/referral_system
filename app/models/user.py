@@ -1,5 +1,6 @@
 from datetime import datetime
 import re
+from uuid import uuid4
 
 from sqlalchemy import (
     Column,
@@ -26,9 +27,7 @@ user_referral = Table(
     'user_referrer',
     Base.metadata,
     Column('user_id', ForeignKey('user.id', ondelete='CASCADE'), primary_key=True),
-    Column(
-        'user_referral', ForeignKey('group.id', ondelete='CASCADE'), primary_key=True
-    ),
+    Column('referral_id', ForeignKey('user.id', ondelete='CASCADE'), primary_key=True),
 )
 
 
@@ -36,8 +35,7 @@ class User(Base):
     __tablename__ = 'user'
 
     id: Mapped[PG_UUID] = mapped_column(
-        PG_UUID(as_uuid=True),
-        primary_key=True,
+        PG_UUID(as_uuid=True), primary_key=True, default=uuid4
     )
     username: Mapped[str] = mapped_column(
         String(50), unique=True, nullable=False, index=True
@@ -52,7 +50,7 @@ class User(Base):
         secondary=user_referral,
         primaryjoin=id == user_referral.c.user_id,
         secondaryjoin=id == user_referral.c.referral_id,
-        backref=backref('referrals', cascade='all, delete'),
+        backref=backref('referred_by', cascade='all, delete'),
     )
 
     @validates('email')
@@ -75,7 +73,9 @@ class ReferralCode(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[PG_UUID] = mapped_column(ForeignKey('user.id', ondelete='CASCADE'))
-    code: Mapped[str] = mapped_column(String(12), unique=True, nullable=False)
+    code: Mapped[str] = mapped_column(
+        String(12), unique=True, nullable=False, index=True
+    )
     expires_at: Mapped[datetime] = mapped_column(nullable=False)
 
     user: Mapped['User'] = relationship(back_populates='referral_code')
@@ -96,3 +96,11 @@ class ReferralCode(Base):
     @is_active.expression
     def is_active(cls):
         return cls.expires_at > func.now()
+
+    # def to_dict(self):
+    #     return {
+    #         'id': self.id,
+    #         'code': self.code,
+    #         'is_active': self.is_active,
+    #         'expires_at': self.expires_at.isoformat() if self.expires_at else None,
+    #     }

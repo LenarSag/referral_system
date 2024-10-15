@@ -22,11 +22,11 @@ async def create_code(
 
 
 async def get_referral_code(
-    session: AsyncSession, referral_code: ReferralCodeBase
+    session: AsyncSession, referral_code: str
 ) -> Optional[ReferralCode]:
     query = (
         select(ReferralCode)
-        .filter(ReferralCode.code == referral_code)
+        .filter_by(code=referral_code)
         .options(selectinload(ReferralCode.user))
     )
     result = await session.execute(query)

@@ -17,7 +17,6 @@ from app.crud.user_repository import get_user_by_email
 from app.db.database import get_session
 from app.models.user import User
 from app.schemas.referral_code_schema import (
-    ReferralCodeBase,
     ReferralCodeCreate,
     ReferralCodeOut,
     ReferralCodeUserOut,
@@ -58,14 +57,7 @@ async def get_referral_code_from_email(
             status_code=status.HTTP_404_NOT_FOUND,
         )
 
-    referral_code_out = ReferralCodeUserOut(
-        id=referral_code.id,
-        code=referral_code.code,
-        expires_at=referral_code.expires_at,
-        is_active=referral_code.is_active,
-        user=user_with_code,
-    )
-    return referral_code_out
+    return referral_code
 
 
 @coderouter.post(
@@ -96,7 +88,7 @@ async def create_referral_code(
 
 @coderouter.delete('/{code}', status_code=status.HTTP_204_NO_CONTENT)
 async def delete_my_referral_code(
-    code: ReferralCodeBase,
+    code: str,
     session: Annotated[AsyncSession, Depends(get_session)],
     current_user: Annotated[User, Depends(get_current_user)],
 ):

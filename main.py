@@ -10,14 +10,16 @@ import uvicorn
 from app.db.database import init_models
 from app.endpoints.referral_code import coderouter
 from app.endpoints.login import loginrouter
+from app.endpoints.user import userrouter
 from config import API_URL
 
 
 app = FastAPI()
 
 
-app.include_router(coderouter, prefix=f'{API_URL}/codes')
 app.include_router(loginrouter, prefix=f'{API_URL}/auth')
+app.include_router(coderouter, prefix=f'{API_URL}/codes')
+app.include_router(userrouter, prefix=f'{API_URL}/users')
 
 
 @app.exception_handler(ValidationError)

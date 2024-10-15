@@ -1,4 +1,5 @@
 from datetime import datetime
+from uuid import UUID
 
 from fastapi.exceptions import ValidationException
 from pydantic import BaseModel, ConfigDict, Field, field_validator
@@ -24,8 +25,11 @@ class ReferralCodeCreate(ReferralCodeBase):
         return expires_at
 
 
-class ReferralCodeOut(ReferralCodeCreate):
+class ReferralCodeOut(BaseModel):
     id: int
+    user_id: UUID
+    code: str
+    expires_at: datetime
     is_active: bool
 
     model_config = ConfigDict(from_attributes=True)

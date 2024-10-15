@@ -1,9 +1,8 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import Depends, APIRouter, HTTPException, status
+from fastapi import Depends, APIRouter
 from fastapi_pagination import Page, Params
-from pydantic import EmailStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
 

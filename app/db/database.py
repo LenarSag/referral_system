@@ -1,7 +1,6 @@
 from collections.abc import AsyncIterator
 
-
-from sqlalchemy import event, inspect
+from sqlalchemy import inspect
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
