@@ -5,6 +5,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.crud.code_repository import get_referral_code
 from app.schemas.referral_code_schema import ReferralCodeOut
+from config import REDIS_EXP_TIME
 
 
 redis = None
@@ -13,7 +14,9 @@ redis = None
 async def get_redis() -> aioredis.Redis:
     global redis
     if not redis:
-        redis = await aioredis.from_url('redis://localhost:6379', decode_responses=True)
+        redis = await aioredis.from_url(
+            'redis://localhost:6379', decode_responses=True
+        )
     return redis
 
 
@@ -33,7 +36,8 @@ async def get_referral_code_from_cache(session: AsyncSession, code: str):
             is_active=referral_code.is_active,
         )
         await redis.set(
-            f'referral:{code}', referral_code_out.model_dump_json(), ex=3600
+            f'referral:{code}', referral_code_out.model_dump_json(),
+            ex=REDIS_EXP_TIME
         )
         return referral_code_out
 

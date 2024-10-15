@@ -20,7 +20,9 @@ class ReferralCodeCreate(ReferralCodeBase):
     def validate_expires_at(cls, expires_at):
         if expires_at:
             if expires_at < datetime.now():
-                raise ValidationException('Expires time less than current time')
+                raise ValidationException(
+                    'Expires time less than current time'
+                )
 
         return expires_at
 

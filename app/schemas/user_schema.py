@@ -4,6 +4,8 @@ from uuid import UUID
 from fastapi.exceptions import ValidationException
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
+from config import EMAIL_LENGTH, USERNAME_LENGTH
+
 
 class UserAuthentication(BaseModel):
     username: str
@@ -11,8 +13,8 @@ class UserAuthentication(BaseModel):
 
 
 class UserCreate(BaseModel):
-    username: str = Field(max_length=50, pattern=r'^[\w.@+-]+$')
-    email: EmailStr = Field(max_length=150)
+    username: str = Field(max_length=USERNAME_LENGTH, pattern=r'^[\w.@+-]+$')
+    email: EmailStr = Field(max_length=EMAIL_LENGTH)
     password: str
 
     @field_validator('password')

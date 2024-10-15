@@ -3,7 +3,6 @@ from typing import Annotated
 from fastapi import Depends, APIRouter, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.crud.code_repository import get_referral_code
 from app.crud.user_repository import (
     check_username_and_email,
     create_new_referral_user,
@@ -21,7 +20,9 @@ from app.utils.emailhunter import verify_email_with_hunter
 loginrouter = APIRouter()
 
 
-@loginrouter.post('/user', response_model=UserOut, status_code=status.HTTP_201_CREATED)
+@loginrouter.post(
+    '/user', response_model=UserOut, status_code=status.HTTP_201_CREATED
+)
 async def create_user(
     user_data: UserCreate,
     session: Annotated[AsyncSession, Depends(get_session)],
@@ -30,7 +31,9 @@ async def create_user(
     if not email_valid:
         print('Fake message: email is not valid!')
 
-    user = await check_username_and_email(session, user_data.username, user_data.email)
+    user = await check_username_and_email(
+        session, user_data.username, user_data.email
+    )
     if user:
         if user.username == user_data.username:
             raise HTTPException(
@@ -66,7 +69,9 @@ async def create_user_as_referral(
             status_code=status.HTTP_400_BAD_REQUEST,
         )
 
-    user = await check_username_and_email(session, user_data.username, user_data.email)
+    user = await check_username_and_email(
+        session, user_data.username, user_data.email
+    )
     if user:
         if user.username == user_data.username:
             raise HTTPException(
@@ -79,7 +84,9 @@ async def create_user_as_referral(
         )
 
     user_data.password = get_hashed_password(user_data.password)
-    new_user = await create_new_referral_user(session, user_data, referral_code)
+    new_user = await create_new_referral_user(
+        session, user_data, referral_code
+    )
     return new_user
 
 
@@ -88,7 +95,9 @@ async def login_for_access_token(
     form_data: UserAuthentication,
     session: Annotated[AsyncSession, Depends(get_session)],
 ) -> Token:
-    user = await authenticate_user(session, form_data.username, form_data.password)
+    user = await authenticate_user(
+        session, form_data.username, form_data.password
+    )
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

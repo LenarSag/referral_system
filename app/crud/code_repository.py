@@ -8,7 +8,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.models.user import ReferralCode, User
-from app.schemas.referral_code_schema import ReferralCodeBase, ReferralCodeCreate
+from app.schemas.referral_code_schema import (
+    ReferralCodeBase, ReferralCodeCreate
+)
 
 
 async def create_code(
@@ -59,6 +61,8 @@ async def get_only_active_code(
     return result.scalar()
 
 
-async def delete_referral_code(session: AsyncSession, code: ReferralCode) -> None:
+async def delete_referral_code(
+    session: AsyncSession, code: ReferralCode
+) -> None:
     await session.delete(code)
     await session.commit()

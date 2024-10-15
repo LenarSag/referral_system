@@ -20,14 +20,22 @@ from sqlalchemy.orm import (
 )
 
 from app.models.base import Base
-from config import CODE_REGEX
+from config import CODE_LENGTH, CODE_REGEX, EMAIL_LENGTH, USERNAME_LENGTH
 
 
 user_referral = Table(
     'user_referrer',
     Base.metadata,
-    Column('user_id', ForeignKey('user.id', ondelete='CASCADE'), primary_key=True),
-    Column('referral_id', ForeignKey('user.id', ondelete='CASCADE'), primary_key=True),
+    Column(
+        'user_id',
+        ForeignKey('user.id', ondelete='CASCADE'),
+        primary_key=True
+    ),
+    Column(
+        'referral_id',
+        ForeignKey('user.id', ondelete='CASCADE'),
+        primary_key=True
+    ),
 )
 
 
@@ -38,14 +46,16 @@ class User(Base):
         PG_UUID(as_uuid=True), primary_key=True, default=uuid4
     )
     username: Mapped[str] = mapped_column(
-        String(50), unique=True, nullable=False, index=True
+        String(USERNAME_LENGTH), unique=True, nullable=False, index=True
     )
     email: Mapped[str] = mapped_column(
-        String(150), unique=True, nullable=False, index=True
+        String(EMAIL_LENGTH), unique=True, nullable=False, index=True
     )
     password: Mapped[str] = mapped_column(nullable=False)
 
-    referral_code: Mapped[list['ReferralCode']] = relationship(back_populates='user')
+    referral_code: Mapped[list['ReferralCode']] = relationship(
+        back_populates='user'
+    )
     referrals: Mapped[list['User']] = relationship(
         secondary=user_referral,
         primaryjoin=id == user_referral.c.user_id,
@@ -72,9 +82,11 @@ class ReferralCode(Base):
     __tablename__ = 'referral_code'
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[PG_UUID] = mapped_column(ForeignKey('user.id', ondelete='CASCADE'))
+    user_id: Mapped[PG_UUID] = mapped_column(
+        ForeignKey('user.id', ondelete='CASCADE')
+    )
     code: Mapped[str] = mapped_column(
-        String(12), unique=True, nullable=False, index=True
+        String(CODE_LENGTH), unique=True, nullable=False, index=True
     )
     expires_at: Mapped[datetime] = mapped_column(nullable=False)
 
@@ -85,7 +97,8 @@ class ReferralCode(Base):
         if not CODE_REGEX.match(code):
             raise ValueError(
                 'Referral code must be at least 12 characters long, '
-                'contain at least one uppercase letter, one lowercase letter, and one digit.'
+                'contain at least one uppercase letter, one lowercase letter, '
+                'and one digit.'
             )
         return code
 
@@ -96,11 +109,3 @@ class ReferralCode(Base):
     @is_active.expression
     def is_active(cls):
         return cls.expires_at > func.now()
-
-    # def to_dict(self):
-    #     return {
-    #         'id': self.id,
-    #         'code': self.code,
-    #         'is_active': self.is_active,
-    #         'expires_at': self.expires_at.isoformat() if self.expires_at else None,
-    #     }
