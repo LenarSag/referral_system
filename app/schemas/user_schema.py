@@ -1,10 +1,11 @@
 import re
+from typing import Optional
 from uuid import UUID
 
 from fastapi.exceptions import ValidationException
 from pydantic import BaseModel, ConfigDict, EmailStr, Field, field_validator
 
-from config import EMAIL_LENGTH, USERNAME_LENGTH
+from config import CODE_REGEX, EMAIL_LENGTH, USERNAME_LENGTH
 
 
 class UserAuthentication(BaseModel):
@@ -16,6 +17,7 @@ class UserCreate(BaseModel):
     username: str = Field(max_length=USERNAME_LENGTH, pattern=r'^[\w.@+-]+$')
     email: EmailStr = Field(max_length=EMAIL_LENGTH)
     password: str
+    code: Optional[str] = Field(None, pattern=CODE_REGEX)
 
     @field_validator('password')
     @classmethod
