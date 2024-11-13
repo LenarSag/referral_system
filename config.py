@@ -1,5 +1,8 @@
 import re
 
+REDIS_URL = 'redis://localhost:6379'
+DATABASE_URL = 'postgresql+asyncpg://postgres:postgres@localhost:5432/postgres'
+
 
 SECRET_KEY = 'b0a3f260fecdc69160d4045c276c28fe99bb78a29bf140075b4766b6931b20b0'
 ALGORITHM = 'HS256'

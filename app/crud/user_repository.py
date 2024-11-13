@@ -8,16 +8,15 @@ from sqlalchemy import or_
 from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.user import ReferralCode, User, user_referral
+from app.models.referral_code import ReferralCode
+from app.models.user import User, user_referral
 from app.schemas.user_schema import UserCreate
 
 
 async def check_username_and_email(
     session: AsyncSession, username: str, email: EmailStr
 ) -> Optional[User]:
-    query = select(User).where(
-        or_(User.username == username, User.email == email)
-    )
+    query = select(User).where(or_(User.username == username, User.email == email))
     result = await session.execute(query)
     return result.scalar()
 
@@ -28,25 +27,19 @@ async def get_user_by_id(session: AsyncSession, id: UUID) -> Optional[User]:
     return result.scalar()
 
 
-async def get_user_by_email(
-    session: AsyncSession, email: EmailStr
-) -> Optional[User]:
+async def get_user_by_email(session: AsyncSession, email: EmailStr) -> Optional[User]:
     query = select(User).filter_by(email=email)
     result = await session.execute(query)
     return result.scalar()
 
 
-async def get_user_by_username(
-    session: AsyncSession, username: str
-) -> Optional[User]:
+async def get_user_by_username(session: AsyncSession, username: str) -> Optional[User]:
     query = select(User).filter_by(username=username)
     result = await session.execute(query)
     return result.scalar()
 
 
-async def create_new_user(
-    session: AsyncSession, user_data: UserCreate
-) -> User:
+async def create_new_user(session: AsyncSession, user_data: UserCreate) -> User:
     new_user = User(**user_data.model_dump())
     session.add(new_user)
     await session.commit()
@@ -60,9 +53,7 @@ async def create_new_referral_user(
     session.add(new_user)
     await session.flush()
 
-    new_referral = {
-        'user_id': referrall_code.user_id, 'referral_id': new_user.id
-    }
+    new_referral = {'user_id': referrall_code.user_id, 'referral_id': new_user.id}
     await session.execute(user_referral.insert().values(new_referral))
     await session.commit()
 

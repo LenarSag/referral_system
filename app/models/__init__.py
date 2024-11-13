@@ -1,2 +1,3 @@
 from .base import Base
-from .user import User, ReferralCode, user_referral
+from .referral_code import ReferralCode
+from .user import User, user_referral

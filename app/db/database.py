@@ -5,15 +5,13 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from app import models
+from config import DATABASE_URL
 
 
-DATABASE_URL = 'postgresql+asyncpg://postgres:postgres@localhost:5432/postgres'
+DB = 'sqlite+aiosqlite:///db.sqlite3'
 
-
-async_engine = create_async_engine(DATABASE_URL, echo=True)
-async_session = sessionmaker(
-    async_engine, class_=AsyncSession, expire_on_commit=False
-)
+async_engine = create_async_engine(DB, echo=True)
+async_session = sessionmaker(async_engine, class_=AsyncSession, expire_on_commit=False)
 
 
 async def init_models():

@@ -1,4 +1,5 @@
 from datetime import datetime
+import json
 from typing import Optional
 
 from fastapi_pagination import Page, Params
@@ -7,10 +8,15 @@ from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.models.user import ReferralCode, User
+from app.db.redis_db import get_redis
+from app.models.referral_code import ReferralCode
+from app.models.user import User
 from app.schemas.referral_code_schema import (
-    ReferralCodeBase, ReferralCodeCreate
+    ReferralCodeBase,
+    ReferralCodeCreate,
+    ReferralCodeOut,
 )
+from config import REDIS_EXP_TIME
 
 
 async def create_code(
@@ -33,6 +39,33 @@ async def get_referral_code(
     )
     result = await session.execute(query)
     return result.scalar()
+
+
+async def get_referral_code_from_cache(session: AsyncSession, code: str):
+    redis = await get_redis()
+    cached_referral_code = await redis.get(f'referral:{code}')
+    if cached_referral_code:
+        return ReferralCodeOut(**json.loads(cached_referral_code))
+
+    print('LEO1')
+    referral_code = await get_referral_code(session, code)
+    print('LEO2')
+    if referral_code:
+        referral_code_out = ReferralCodeOut(
+            id=referral_code.id,
+            user_id=referral_code.user_id,
+            code=referral_code.code,
+            expires_at=referral_code.expires_at,
+            is_active=referral_code.is_active,
+        )
+        await redis.set(
+            f'referral:{code}',
+            referral_code_out.model_dump_json(),
+            ex=REDIS_EXP_TIME,
+        )
+        return referral_code_out
+
+    return None
 
 
 async def get_paginated_codes(
@@ -61,8 +94,6 @@ async def get_only_active_code(
     return result.scalar()
 
 
-async def delete_referral_code(
-    session: AsyncSession, code: ReferralCode
-) -> None:
+async def delete_referral_code(session: AsyncSession, code: ReferralCode) -> None:
     await session.delete(code)
     await session.commit()
