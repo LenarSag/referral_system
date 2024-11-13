@@ -47,9 +47,7 @@ async def get_referral_code_from_cache(session: AsyncSession, code: str):
     if cached_referral_code:
         return ReferralCodeOut(**json.loads(cached_referral_code))
 
-    print('LEO1')
     referral_code = await get_referral_code(session, code)
-    print('LEO2')
     if referral_code:
         referral_code_out = ReferralCodeOut(
             id=referral_code.id,

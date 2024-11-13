@@ -35,7 +35,6 @@ async def create_user(
                 status_code=status.HTTP_404_NOT_FOUND,
             )
 
-    print('LEO')
     # checks email with Emailhunter
     email_valid = await verify_email_with_hunter(user_data.email)
     if not email_valid:
