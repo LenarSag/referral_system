@@ -9,7 +9,7 @@ from config import CODE_REGEX
 
 
 class ReferralCodeBase(BaseModel):
-    code: str = Field(pattern=CODE_REGEX)
+    code: str = Field(..., pattern=CODE_REGEX, description='Referral code')
 
 
 class ReferralCodeCreate(ReferralCodeBase):
@@ -20,19 +20,17 @@ class ReferralCodeCreate(ReferralCodeBase):
     def validate_expires_at(cls, expires_at):
         if expires_at:
             if expires_at < datetime.now():
-                raise ValidationException(
-                    'Expires time less than current time'
-                )
+                raise ValidationException('Expires time less than current time')
 
         return expires_at
 
 
 class ReferralCodeOut(BaseModel):
-    id: int
-    user_id: UUID
-    code: str
-    expires_at: datetime
-    is_active: bool
+    id: int = Field(..., description='Code id')
+    user_id: UUID = Field(..., description='User id')
+    code: str = Field(..., description='Referral code')
+    expires_at: datetime = Field(..., description='Date and time of expiration')
+    is_active: bool = Field(..., description='Active code or not')
 
     model_config = ConfigDict(from_attributes=True)
 

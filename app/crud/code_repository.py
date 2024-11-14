@@ -8,7 +8,7 @@ from sqlalchemy.future import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.db.redis_db import get_redis
+from app.db.redis_db import redis_pool
 from app.models.referral_code import ReferralCode
 from app.models.user import User
 from app.schemas.referral_code_schema import (
@@ -42,7 +42,7 @@ async def get_referral_code(
 
 
 async def get_referral_code_from_cache(session: AsyncSession, code: str):
-    redis = await get_redis()
+    redis = await redis_pool()
     cached_referral_code = await redis.get(f'referral:{code}')
     if cached_referral_code:
         return ReferralCodeOut(**json.loads(cached_referral_code))

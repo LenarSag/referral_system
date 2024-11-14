@@ -9,15 +9,17 @@ from config import CODE_REGEX, EMAIL_LENGTH, USERNAME_LENGTH
 
 
 class UserAuthentication(BaseModel):
-    username: str
-    password: str
+    username: str = Field(..., description='Username')
+    password: str = Field(..., description='Password')
 
 
 class UserCreate(BaseModel):
-    username: str = Field(max_length=USERNAME_LENGTH, pattern=r'^[\w.@+-]+$')
-    email: EmailStr = Field(max_length=EMAIL_LENGTH)
-    password: str
-    code: Optional[str] = Field(None, pattern=CODE_REGEX)
+    username: str = Field(
+        ..., max_length=USERNAME_LENGTH, pattern=r'^[\w.@+-]+$', description='Username'
+    )
+    email: EmailStr = Field(..., max_length=EMAIL_LENGTH, description='Email address')
+    password: str = Field(..., description='Password')
+    code: Optional[str] = Field(None, pattern=CODE_REGEX, description='Referral code')
 
     @field_validator('password')
     @classmethod
@@ -41,9 +43,9 @@ class UserCreate(BaseModel):
 
 
 class UserOut(BaseModel):
-    id: UUID
-    email: EmailStr
-    username: str
+    id: UUID = Field(..., description='User id')
+    email: EmailStr = Field(..., description='Email address')
+    username: str = Field(..., description='Username')
 
     model_config = ConfigDict(from_attributes=True)
 

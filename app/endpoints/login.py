@@ -11,7 +11,7 @@ from app.crud.user_repository import (
 )
 from app.db.database import get_session
 
-from app.schemas.fastapi_models import Token
+from app.schemas.fastapi_schema import Token
 from app.schemas.user_schema import UserAuthentication, UserCreate, UserOut
 from app.security.authentication import authenticate_user, create_access_token
 from app.security.pwd_crypt import get_hashed_password

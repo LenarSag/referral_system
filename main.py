@@ -6,7 +6,6 @@ from fastapi.responses import JSONResponse
 from pydantic import ValidationError
 import uvicorn
 
-
 from app.db.database import init_models
 from app.endpoints.referral_code import coderouter
 from app.endpoints.login import loginrouter

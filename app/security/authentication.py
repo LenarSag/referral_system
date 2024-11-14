@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.crud.user_repository import get_user_by_id, get_user_by_username
 from app.models.user import User
 from app.db.database import get_session
-from app.schemas.fastapi_models import TokenData
+from app.schemas.fastapi_schema import TokenData
 from app.security.pwd_crypt import verify_password
 from config import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, API_URL, SECRET_KEY
 
