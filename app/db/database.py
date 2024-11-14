@@ -8,9 +8,7 @@ from app import models
 from config import DATABASE_URL
 
 
-DB = 'sqlite+aiosqlite:///db.sqlite3'
-
-async_engine = create_async_engine(DB, echo=True)
+async_engine = create_async_engine(DATABASE_URL, echo=True)
 async_session = sessionmaker(async_engine, class_=AsyncSession, expire_on_commit=False)
 
 
